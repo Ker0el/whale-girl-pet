@@ -71,6 +71,53 @@ label,
   font-size: 14px;
 }
 
+.label {
+  margin: 4px 0 10px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* Twelve types, four to a row: narrow enough that the window does not have to
+   grow sideways for them, and short enough that all twelve fit without the
+   section needing its own scroll. */
+.cats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px 8px;
+}
+
+.cats label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.cats label:hover {
+  background: var(--ink-700);
+  border-color: var(--ink-500);
+}
+
+/* Same idea as the preset buttons: the row itself shows what is in force. */
+.cats label.on {
+  background: var(--ink-700);
+  border-color: var(--blue-400);
+  color: var(--blue-200);
+}
+
+.cats input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--blue-400);
+}
+
 #custom {
   width: 110px;
   padding: 9px 12px;

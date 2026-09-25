@@ -74,6 +74,8 @@ contextBridge.exposeInMainWorld("petHost", {
   hitokotoState: () => ipcRenderer.invoke("hitokoto:state"),
   /** Main clamps this and answers with hitokoto:state — the field is free text. */
   setHitokotoMinutes: (minutes) => ipcRenderer.send("hitokoto:set-minutes", minutes),
+  /** Sentence types. Main filters the list and answers with hitokoto:state. */
+  setHitokotoCategories: (ids) => ipcRenderer.send("hitokoto:set-categories", ids),
   previewHitokoto: () => ipcRenderer.send("hitokoto:preview"),
   closeHitokoto: () => ipcRenderer.send("hitokoto:close"),
   onHitokotoState: (handler) => ipcRenderer.on("hitokoto:state", (_event, state) => handler(state)),

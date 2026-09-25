@@ -161,7 +161,10 @@ let config = {
   firstRunDone: false,
   bubbleStyle: BUBBLE_STYLE_DEFAULT,
   hitokoto: true,
-  hitokotoMinutes: HITOKOTO_DEFAULT_MINUTES
+  hitokotoMinutes: HITOKOTO_DEFAULT_MINUTES,
+  // Copied rather than referenced: this is a value the user can replace, and it
+  // should not be possible to write through to the module's own constant.
+  hitokotoCategories: [...quotes.DEFAULT_CATEGORIES]
 };
 
 /** True when a saved point still lands on a connected display. */
@@ -913,6 +916,18 @@ function hitokotoMinutes() {
   return clampHitokotoMinutes(config.hitokotoMinutes);
 }
 
+/**
+ * The sentence types to ask for.
+ *
+ * A list that is missing or the wrong shape is a broken config and falls back
+ * to the default set. An empty list is not broken — it is what unchecking
+ * everything gives, and it means 不限.
+ */
+function hitokotoCategories() {
+  if (!Array.isArray(config.hitokotoCategories)) return quotes.DEFAULT_CATEGORIES;
+  return quotes.normaliseCategories(config.hitokotoCategories);
+}
+
 /** Point the timer at the current setting. Safe to call at any time. */
 function scheduleHitokoto() {
   clearTimeout(hitokotoTimer);
@@ -926,7 +941,7 @@ async function sayHitokoto() {
   // one that never answers — cannot stall the series.
   scheduleHitokoto();
   if (!petCanSpeak()) return;
-  const quote = await quotes.fetchOne();
+  const quote = await quotes.fetchOne(hitokotoCategories());
   if (!quote) return;
   // It may have been switched off, or the pet hidden, while that was in flight.
   if (config.hitokoto !== true || !petCanSpeak()) return;
@@ -967,12 +982,26 @@ function scheduleHourlyBalance() {
 // ---------------------------------------------------------------------------
 // 一言 interval
 // ---------------------------------------------------------------------------
+/**
+ * Everything the settings window needs, in one shape.
+ *
+ * `available` travels with the state rather than being hard-coded in the
+ * renderer so the two lists cannot drift: an id the window offers but this
+ * build does not know about would be filtered out of the request and the user
+ * would be left wondering why their choice did nothing.
+ */
+function hitokotoStatePayload() {
+  return {
+    minutes: hitokotoMinutes(),
+    on: config.hitokoto === true,
+    categories: hitokotoCategories(),
+    available: quotes.CATEGORIES
+  };
+}
+
 function pushHitokotoState() {
   if (!hitokotoWin || hitokotoWin.isDestroyed()) return;
-  hitokotoWin.webContents.send("hitokoto:state", {
-    minutes: hitokotoMinutes(),
-    on: config.hitokoto === true
-  });
+  hitokotoWin.webContents.send("hitokoto:state", hitokotoStatePayload());
 }
 
 function openHitokoto() {
@@ -984,7 +1013,7 @@ function openHitokoto() {
   }
   hitokotoWin = new BrowserWindow({
     width: 620,
-    height: 420,
+    height: 610,
     resizable: false,
     maximizable: false,
     title: "鲸鱼娘桌宠 · 一言",
@@ -1521,10 +1550,18 @@ function registerIpc() {
     if (stylesWin && !stylesWin.isDestroyed()) stylesWin.close();
   });
 
-  ipcMain.handle("hitokoto:state", () => ({
-    minutes: hitokotoMinutes(),
-    on: config.hitokoto === true
-  }));
+  ipcMain.handle("hitokoto:state", () => hitokotoStatePayload());
+
+  ipcMain.on("hitokoto:set-categories", (_e, ids) => {
+    // Normalised here rather than trusted: this becomes the `c` parameter sent
+    // to a third party, and it comes from a renderer.
+    config.hitokotoCategories = quotes.normaliseCategories(ids);
+    saveConfig();
+    // No need to re-arm the timer. The list is read when the request is made,
+    // so the next tick already uses the new one, and re-arming would push the
+    // next sentence away every time a checkbox is clicked.
+    pushHitokotoState();
+  });
 
   ipcMain.on("hitokoto:set-minutes", (_e, minutes) => {
     config.hitokotoMinutes = clampHitokotoMinutes(minutes);

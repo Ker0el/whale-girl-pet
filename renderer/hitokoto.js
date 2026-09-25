@@ -1,29 +1,76 @@
-// 一言 interval settings.
+// 一言 settings: how often, and what kind of sentences.
 //
-// A window rather than a row in the menu for the same reason the styles have
-// one: a number that can be anything from 1 to 1440 does not fit on a menu,
-// and the presets people actually want need to be one click rather than five
-// presses of a spinner.
+// A window rather than rows in the menu for the same reason the bubble styles
+// have one: a number that can be anything from 1 to 1440 does not fit on a
+// menu, and neither do twelve checkboxes.
 "use strict";
 
 const presets = document.getElementById("presets");
+const categoriesEl = document.getElementById("categories");
 const custom = document.getElementById("custom");
 const status = document.getElementById("status");
 
 let state = null;
+/** The checkboxes are built once and then only synced, so focus survives. */
+let built = false;
+
+function paintStatus() {
+  status.textContent = state.on
+    ? `已开启，每 ${state.minutes} 分钟说一句。`
+    : `已关闭。打开后每 ${state.minutes} 分钟说一句。`;
+}
+
+function paintCategories() {
+  // The list of types comes from main rather than from a copy kept here, so a
+  // type this build does not know about can never be offered and then quietly
+  // dropped from the request.
+  if (!built) {
+    for (const category of state.available || []) {
+      const label = document.createElement("label");
+      const box = document.createElement("input");
+      box.type = "checkbox";
+      box.value = category.id;
+      box.addEventListener("change", () => toggle(category.id, box.checked));
+      const text = document.createElement("span");
+      text.textContent = category.label;
+      label.append(box, text);
+      categoriesEl.append(label);
+    }
+    built = true;
+  }
+
+  const chosen = new Set(state.categories || []);
+  for (const label of categoriesEl.children) {
+    const box = label.querySelector("input");
+    box.checked = chosen.has(box.value);
+    label.classList.toggle("on", box.checked);
+  }
+}
 
 function paint() {
-  // Nothing is drawn until the real setting arrives. Painting the defaults
-  // first would put 「已关闭」 on screen for a moment in a window that is about
-  // to report that 一言 is on, which reads as a setting that failed to stick.
+  // Nothing is drawn until the real setting arrives. Painting the defaults first
+  // would put 「已关闭」 on screen for a moment in a window that is about to
+  // report that 一言 is on, which reads as a setting that failed to stick.
   if (!state) return;
+
   for (const button of presets.children) {
     button.classList.toggle("on", Number(button.dataset.min) === state.minutes);
   }
   custom.value = String(state.minutes);
-  status.textContent = state.on
-    ? `已开启，每 ${state.minutes} 分钟说一句。`
-    : `已关闭。打开后每 ${state.minutes} 分钟说一句。`;
+  paintStatus();
+  paintCategories();
+}
+
+function toggle(id, on) {
+  const next = new Set(state.categories || []);
+  if (on) next.add(id);
+  else next.delete(id);
+  // Applied locally first so the row lights up under the click, then main
+  // answers with the authoritative list and paint() corrects anything that was
+  // filtered out.
+  state.categories = [...next];
+  paintCategories();
+  window.petHost.setHitokotoCategories([...next]);
 }
 
 function apply(minutes) {
