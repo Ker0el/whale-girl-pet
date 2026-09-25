@@ -52,5 +52,10 @@ contextBridge.exposeInMainWorld("petHost", {
   /** Resize the settings window to the given outer height. */
   fitSettings: (height) => ipcRenderer.send("settings:fit", height),
   closeSettings: () => ipcRenderer.send("settings:close"),
+
+  // --- tip window ---
+  tipImage: () => ipcRenderer.invoke("tip:image"),
+  fitTip: (height) => ipcRenderer.send("tip:fit", height),
+  closeTip: () => ipcRenderer.send("tip:close"),
   onFocusKey: (handler) => ipcRenderer.on("settings:focus-key", () => handler())
 });

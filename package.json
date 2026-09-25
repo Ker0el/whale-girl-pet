@@ -29,7 +29,8 @@
       "preload.js",
       "renderer/**/*",
       "assets/icon.ico",
-      "assets/tray.png"
+      "assets/tray.png",
+      "assets/zanshang.png"
     ],
     "extraFiles": [
       { "from": "assets/素材", "to": "素材" },

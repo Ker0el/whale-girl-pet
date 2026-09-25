@@ -1,0 +1,44 @@
+/* Same blue palette as the picker and settings windows (see theme.css). */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 20px 24px 22px;
+  background: var(--ink-800);
+  color: var(--text);
+  font: 13px/1.7 system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  text-align: center;
+}
+
+h1 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--blue-200);
+}
+
+.hint {
+  margin: 0 0 14px;
+  color: var(--text-muted);
+}
+
+.hint.small {
+  font-size: 12px;
+  margin: 12px 0 0;
+}
+
+/* The QR code carries its own white background and quiet zone — drawing it on
+   a card rather than straight onto the dark surface keeps that intact, so
+   scanners still get the contrast they expect. */
+#qr {
+  display: block;
+  width: 300px;
+  height: 300px;
+  margin: 0 auto;
+  object-fit: contain;
+  border-radius: var(--radius);
+  background: #ffffff;
+  padding: 10px;
+}

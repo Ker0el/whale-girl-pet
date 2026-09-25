@@ -66,6 +66,7 @@ let win = null;
 let menuWin = null;
 let picker = null;
 let settingsWin = null;
+let tipWin = null;
 let tray = null;
 let quitting = false;
 
@@ -387,6 +388,7 @@ function menuItems() {
       checked: config.clickSwitch === true
     },
     { type: "separator" },
+    { id: "tip", label: "请我喝杯奶茶" },
     { id: "quit", label: "退出" }
   ];
 }
@@ -521,6 +523,9 @@ function runMenuCommand(id) {
       break;
     case "hide-pet":
       toggleHidden();
+      break;
+    case "tip":
+      openTip();
       break;
     case "quit":
       quitting = true;
@@ -657,6 +662,42 @@ function trackSpend(balance) {
   return config.spend;
 }
 
+/**
+ * The tip window.
+ *
+ * A plain framed window rather than another frameless one: it is something you
+ * look at once and close, and a title bar is the clearest way to offer that.
+ */
+function openTip() {
+  if (tipWin && !tipWin.isDestroyed()) {
+    tipWin.show();
+    tipWin.moveTop();
+    tipWin.focus();
+    return;
+  }
+  tipWin = new BrowserWindow({
+    width: 380,
+    height: 540,
+    resizable: false,
+    maximizable: false,
+    title: "请我喝杯奶茶",
+    icon: bundledAsset("icon.ico"),
+    backgroundColor: "#16232d",
+    autoHideMenuBar: true,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+      contextIsolation: true,
+      nodeIntegration: false
+    }
+  });
+  tipWin.setMenuBarVisibility(false);
+  tipWin.loadFile(path.join(__dirname, "renderer", "tip.html"));
+  bindAbovePet(tipWin);
+  tipWin.on("closed", () => {
+    tipWin = null;
+  });
+}
+
 async function showBalance({ silent = false } = {}) {
   const key = getApiKey();
   if (!key) {
@@ -737,6 +778,7 @@ function buildTrayMenu() {
     { label: "开机自启", type: "checkbox", checked: autoStartEnabled(), click: () => runMenuCommand("auto-start") },
     { label: "点击切换表情", type: "checkbox", checked: config.clickSwitch === true, click: () => runMenuCommand("click-switch") },
     { type: "separator" },
+    { label: "请我喝杯奶茶", click: () => openTip() },
     { label: "退出", click: () => { quitting = true; app.quit(); } }
   ];
   return Menu.buildFromTemplate(items);
@@ -948,6 +990,28 @@ function registerIpc() {
     } catch (_) {
       // Keep the current icon; a bad thumbnail is not worth failing over.
     }
+  });
+
+  // The QR image lives inside the asar, so it is handed over as bytes and shown
+  // through a blob: URL like every other image in the app.
+  ipcMain.handle("tip:image", async () => {
+    try {
+      return new Uint8Array(await fsp.readFile(bundledAsset("zanshang.png")));
+    } catch (_) {
+      return null;
+    }
+  });
+
+  ipcMain.on("tip:fit", (_e, height) => {
+    if (!tipWin || tipWin.isDestroyed()) return;
+    const next = Math.max(200, Math.ceil(Number(height) || 0));
+    const bounds = tipWin.getBounds();
+    if (Math.abs(bounds.height - next) < 2) return;
+    tipWin.setBounds({ ...bounds, height: next });
+  });
+
+  ipcMain.on("tip:close", () => {
+    if (tipWin && !tipWin.isDestroyed()) tipWin.close();
   });
 
   ipcMain.on("settings:close", () => {
