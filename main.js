@@ -21,6 +21,7 @@ const {
 } = require("electron");
 const path = require("node:path");
 const fsp = require("node:fs/promises");
+const { isPeakNow, dateKey } = require("./peak");
 
 const DEFAULT_SKIN = "默认";
 const DEEPSEEK_BALANCE_URL = "https://api.deepseek.com/user/balance";
@@ -41,6 +42,8 @@ const EDGE_MARGIN = 16;
 // How often to sample the balance while the app runs, so "spent today" stays
 // meaningful without the user having to click. Only used when a key is saved.
 const BALANCE_POLL_MS = 10 * 60 * 1000;
+
+
 
 // Keeps the config out of a Chinese-named directory: %APPDATA% is browsed by
 // humans and by backup/cleanup tools, and ASCII survives both.
@@ -623,12 +626,6 @@ function openSettings(focusKeyField) {
   });
 }
 
-/** Local calendar day as YYYY-MM-DD, so "today" flips at the user's midnight. */
-function localDayKey(d = new Date()) {
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
-
 /**
  * Fold a fresh balance reading into today's spend total.
  *
@@ -640,7 +637,7 @@ function localDayKey(d = new Date()) {
  * what was observed rather than an official statement.
  */
 function trackSpend(balance) {
-  const today = localDayKey();
+  const today = dateKey(new Date());
   const prev = config.spend && typeof config.spend === "object" ? config.spend : {};
 
   if (prev.day !== today) {
@@ -677,9 +674,10 @@ async function showBalance({ silent = false } = {}) {
     const balance = Number(info.total_balance);
     const spend = trackSpend(balance);
     if (silent) return;
+    const period = isPeakNow() ? "高峰时段" : "空闲时段（半价）";
     notify(
       "鲸鱼娘桌宠 · 余额",
-      `余额 ${balance.toFixed(2)} ${info.currency} · 今日消费 ${spend.total.toFixed(2)}`
+      `余额 ${balance.toFixed(2)} ${info.currency} · 今日消费 ${spend.total.toFixed(2)} · ${period}`
     );
   } catch (err) {
     if (silent) return;

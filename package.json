@@ -25,6 +25,7 @@
     },
     "files": [
       "main.js",
+      "peak.js",
       "preload.js",
       "renderer/**/*",
       "assets/icon.ico",
