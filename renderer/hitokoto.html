@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+    <title>一言</title>
+    <link rel="stylesheet" href="theme.css" />
+    <link rel="stylesheet" href="hitokoto.css" />
+  </head>
+  <body>
+    <h1>一言</h1>
+    <p class="hint">每隔一段时间，桌宠用气泡念一句。开关在右键菜单的「一言」那一行。</p>
+
+    <div class="row" id="presets">
+      <button type="button" data-min="1">1 分钟</button>
+      <button type="button" data-min="5">5 分钟</button>
+      <button type="button" data-min="15">15 分钟</button>
+      <button type="button" data-min="30">30 分钟</button>
+      <button type="button" data-min="60">60 分钟</button>
+    </div>
+
+    <div class="row">
+      <label for="custom">自定义</label>
+      <input id="custom" type="number" min="1" max="1440" step="1" />
+      <span class="unit">分钟</span>
+      <button type="button" id="save">保存</button>
+    </div>
+
+    <p id="status" class="hint small"></p>
+
+    <div class="row end">
+      <button type="button" id="preview">来一条看看</button>
+      <button type="button" id="close">关闭</button>
+    </div>
+
+    <script src="hitokoto.js"></script>
+  </body>
+</html>

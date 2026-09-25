@@ -19,10 +19,6 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 let size = PET_SIZE_PX;
 let currentName = null;
-// Whether a left click swaps the animation. Off by default: a pet that
-// changes when you click it while dragging it around gets annoying fast.
-// Dragging, the wheel and the menu all keep working either way.
-let clickSwitch = false;
 
 // ---------------------------------------------------------------------------
 // Showing an animation
@@ -130,7 +126,10 @@ function endDrag(e) {
     IMG.releasePointerCapture(e.pointerId);
   } catch (_) {}
 
-  // A press that barely moved is a click, not a drag.
+  // A press that barely moved is a click, not a drag. The only thing a click
+  // does is count towards a double click; there is deliberately no
+  // click-to-change-action, because a pet that changes when you click it while
+  // dragging it around gets annoying fast. Actions are picked from the menu.
   if (dragMoved <= CLICK_MOVE_TOLERANCE) {
     const now = Date.now();
     if (now - lastClickAt < DBLCLICK_MS) {
@@ -139,8 +138,6 @@ function endDrag(e) {
       window.petHost.resize(size);
     } else {
       lastClickAt = now;
-      // Randomness lives in the main process so the choice can be remembered.
-      if (clickSwitch) window.petHost.randomReaction();
     }
   }
 }
@@ -196,9 +193,6 @@ window.petHost.onExec((msg) => {
     case "reaction":
       showReaction(msg.arg);
       break;
-    case "click-switch":
-      clickSwitch = Boolean(msg.arg);
-      break;
     case "click-through-off":
       // Forced pass-through was just disabled in main. Main resets its cached
       // value in the same breath, so re-asserting the square always lands.
@@ -218,7 +212,6 @@ async function boot() {
   for (let attempt = 0; attempt < 30 && !started; attempt++) {
     try {
       const cat = await window.petHost.catalog();
-      if (typeof cat.clickSwitch === "boolean") clickSwitch = cat.clickSwitch;
       if (cat.current) {
         // Resume whatever was on screen last time, so the pet looks the same
         // after a restart as it did before one.

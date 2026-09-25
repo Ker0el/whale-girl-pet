@@ -10,7 +10,7 @@
 ; 不依赖编译时的工作目录。
 
 #define AppName "鲸鱼娘桌宠"
-#define AppVersion "1.0.0"
+#define AppVersion "1.1.0"
 #define AppPublisher "星空"
 #define AppExeName "鲸鱼娘桌宠.exe"
 #define RootDir SourcePath + ".."

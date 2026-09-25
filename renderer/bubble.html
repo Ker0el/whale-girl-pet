@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <!-- Nothing here loads an image or touches the network: the whole bubble is
+         drawn by bubble.css. So there is nothing to allow beyond the stylesheet
+         and the script. -->
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+    <title>气泡</title>
+    <link rel="stylesheet" href="theme.css" />
+    <link rel="stylesheet" href="bubble.css" />
+  </head>
+  <body class="bubble-window">
+    <div id="bubble" class="bubble skin-classic"><i class="tail"></i><span id="text"></span></div>
+    <script src="bubble.js"></script>
+  </body>
+</html>

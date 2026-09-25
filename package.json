@@ -1,7 +1,7 @@
 {
   "name": "whale-girl-pet",
   "productName": "鲸鱼娘桌宠",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "鲸鱼娘桌宠 — 一个独立的 Windows 桌面宠物",
   "author": "星空",
@@ -27,6 +27,7 @@
     "files": [
       "main.js",
       "peak.js",
+      "quotes.js",
       "preload.js",
       "renderer/**/*",
       "assets/icon.ico",

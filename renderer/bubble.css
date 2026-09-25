@@ -1,0 +1,198 @@
+/* Speech bubble appearance.
+ *
+ * Shared between the bubble's own window and the style chooser, which draws one
+ * bubble per available style so the choice can be made by looking rather than by
+ * reading a name. Anything that only makes sense inside the app's bubble window
+ * — the transparent page, the padding that keeps the glow from being clipped,
+ * the entrance — is scoped to .bubble-window so the chooser can link this file
+ * without inheriting it.
+ *
+ * The geometry lives here once and every style is paint on top of it: a style
+ * that changed the padding or the tail position would change how big the bubble
+ * is, and main.js places the window from the measured size.
+ *
+ * NOTE: the padding on .bubble-window must match BUBBLE_PAD in main.js.
+ */
+* {
+  box-sizing: border-box;
+}
+
+/* The scale main sends with each message. The pet zooms from 80px to 640px and
+   a bubble frozen at 13px looks like a thumbtack next to the 640px case, so
+   everything sized here multiplies by this. The chooser sets its own. */
+:root {
+  --f: 1;
+}
+
+/* ---------------------------------------------------------------------------
+   Geometry — identical for every style
+   --------------------------------------------------------------------------- */
+.bubble {
+  position: relative;
+  max-width: calc(232px * var(--f));
+  padding: calc(11px * var(--f)) calc(16px * var(--f)) calc(12px * var(--f));
+  font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  font-size: calc(13px * var(--f));
+  line-height: 1.62;
+  text-align: center;
+  /* The text main sends carries a real newline; this turns it into a line break
+     without needing innerHTML. */
+  white-space: pre-line;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+  /* Every style's glow is a filter rather than a box-shadow. A filter runs on
+     the element together with its descendants, so the tail is inside the
+     silhouette it traces and the shadow follows the bubble and tail as one
+     shape. With a box-shadow the tail casts nothing, and the seam between the
+     two shows up as a tail that looks pasted on. */
+  filter: drop-shadow(0 calc(6px * var(--f)) calc(12px * var(--f)) rgba(33, 150, 243, 0.5));
+}
+
+/* The tail is a square rotated 45° tucked under the bottom edge, so only its
+   lower corner shows. The rotation is also why border-radius only needs one
+   corner. Styles that outline the bubble outline the tail too, by putting
+   border-right/bottom on this square: after the rotation those two edges face
+   outwards, which is exactly where the outline belongs. */
+.tail {
+  position: absolute;
+  left: 50%;
+  bottom: calc(-7px * var(--f));
+  width: calc(16px * var(--f));
+  height: calc(16px * var(--f));
+  border-radius: 0 0 calc(3px * var(--f)) 0;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+/* ---------------------------------------------------------------------------
+   The bubble's own window
+   --------------------------------------------------------------------------- */
+html.bubble-window,
+body.bubble-window {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+body.bubble-window {
+  display: block;
+  /* The layout is driven by the text and never by the window, and that is load
+     bearing: main sizes the window from what this page measures. With the
+     ordinary shrink-to-fit the measurement would depend on the window's current
+     width, resizing the window would change where the text wraps, and the two
+     would chase each other — a bubble that had once wrapped would keep
+     reporting the width of the wrapped layout and could never widen again.
+     content-box because the global border-box rule would otherwise take the
+     padding out of the text's width instead of adding to it. */
+  box-sizing: content-box;
+  width: max-content;
+  padding: 22px;
+  /* The entrance is a fade plus a few px of travel, and it lives on <body>
+     rather than on .bubble for a reason: bubble.js measures the bubble, and a
+     translate changes neither width nor height, so the measurement stays right
+     no matter which frame it lands on. A scale would not be safe, which is why
+     the entrance does not scale. */
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease-out, transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+body.bubble-window.shown {
+  opacity: 1;
+  transform: none;
+}
+
+/* With the tail on top the bubble hangs below the pet, so it arrives from above
+   instead — the travel always points away from where the pet is. */
+body.bubble-window.below {
+  transform: translateY(-6px);
+}
+
+body.bubble-window.below.shown {
+  transform: none;
+}
+
+/* The pet is near the top of the screen, so the bubble goes below it and the
+   tail points up: the same square rotated the other way round. */
+body.bubble-window.below .tail {
+  bottom: auto;
+  top: calc(-7px * var(--f));
+  transform: translateX(-50%) rotate(-135deg);
+}
+
+/* A tail on top sticks out of the normal flow, which would leave the drawn
+   shape starting above the padding edge. Pushing the bubble down by exactly
+   that overhang keeps the shape flush with the padding edge in both
+   orientations — and that is what lets main.js place the window from the
+   reported size and the padding alone. */
+body.bubble-window.below .bubble {
+  margin-top: calc(10.3px * var(--f));
+}
+
+/* ---------------------------------------------------------------------------
+   Styles
+   --------------------------------------------------------------------------- */
+/* The menu's blue and its shape, so the bubble reads as the same object as the
+   right-click menu. */
+.skin-classic {
+  background: var(--blue-400);
+  color: var(--text-on-accent);
+  border-radius: calc(10px * var(--f));
+}
+
+.skin-classic .tail {
+  background: var(--blue-400);
+}
+
+/* The picker and settings surface, so the quietest option is the one that
+   matches the rest of the app's windows. */
+.skin-dark {
+  background: rgba(22, 35, 45, 0.94);
+  color: var(--text);
+  border: 1px solid var(--blue-400);
+  border-radius: calc(10px * var(--f));
+  box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.13);
+  filter: drop-shadow(0 calc(6px * var(--f)) calc(13px * var(--f)) rgba(0, 0, 0, 0.6));
+}
+
+.skin-dark .tail {
+  background: rgba(22, 35, 45, 0.94);
+  border-right: 1px solid var(--blue-400);
+  border-bottom: 1px solid var(--blue-400);
+}
+
+/* A drawn speech bubble: highest contrast of the five, and the only one that
+   reads as a shape rather than a surface. */
+.skin-comic {
+  background: #ffffff;
+  color: var(--blue-700);
+  border: 2px solid var(--blue-400);
+  border-radius: calc(14px * var(--f));
+  font-weight: 500;
+  filter: drop-shadow(0 calc(5px * var(--f)) calc(10px * var(--f)) rgba(8, 34, 60, 0.45));
+}
+
+.skin-comic .tail {
+  background: #ffffff;
+  border-right: 2px solid var(--blue-400);
+  border-bottom: 2px solid var(--blue-400);
+}
+
+/* The softest of the four: the largest radius, and a light gradient with an
+   inner shadow along the bottom that gives it a little depth. */
+.skin-candy {
+  background: linear-gradient(180deg, #f2f8ff 0%, #d3e8fa 100%);
+  color: #1d5f96;
+  border: 2px solid #ffffff;
+  border-radius: calc(20px * var(--f));
+  font-weight: 500;
+  box-shadow: inset 0 -3px 0 rgba(100, 181, 246, 0.3);
+  filter: drop-shadow(0 calc(6px * var(--f)) calc(11px * var(--f)) rgba(33, 150, 243, 0.42));
+}
+
+.skin-candy .tail {
+  background: #d3e8fa;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+}

@@ -24,6 +24,15 @@ window.addEventListener("keydown", (e) => {
   if (e.key === "Escape") window.petHost.closeTip();
 });
 
+// The author link must not navigate. There is no frame and no tabs here, so
+// following an <a href> would replace the window's content with the web page
+// and leave no way back. The click is handed to main instead, which owns the
+// URL — nothing in this window can talk it into opening somewhere else.
+document.getElementById("author").addEventListener("click", (e) => {
+  e.preventDefault();
+  window.petHost.openAuthorPage();
+});
+
 // Fit the window to the content, the same way the settings window does.
 requestAnimationFrame(() => {
   const chrome = window.outerHeight - window.innerHeight;

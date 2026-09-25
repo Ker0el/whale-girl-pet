@@ -1,6 +1,6 @@
 // Narrow bridge between the renderers and the main process.
 //
-// All four windows share this one preload. They run with contextIsolation on
+// All the windows share this one preload. They run with contextIsolation on
 // and no Node access, so window movement, menu commands, asset bytes and the
 // API key all have to cross this boundary explicitly.
 "use strict";
@@ -53,9 +53,36 @@ contextBridge.exposeInMainWorld("petHost", {
   fitSettings: (height) => ipcRenderer.send("settings:fit", height),
   closeSettings: () => ipcRenderer.send("settings:close"),
 
+  // --- speech bubble ---
+  /** Text to say, plus how big to draw it and which side of the pet it is on. */
+  onBubbleShow: (handler) => ipcRenderer.on("bubble:show", (_event, msg) => handler(msg)),
+  /** Start the entrance — sent only once the window is actually on screen. */
+  onBubblePop: (handler) => ipcRenderer.on("bubble:pop", () => handler()),
+  /** Report the drawn size so main can size and place the window. */
+  bubbleSize: (size) => ipcRenderer.send("bubble:size", size),
+  bubbleReady: () => ipcRenderer.send("bubble:ready"),
+  /** A click on the bubble dismisses it. */
+  bubbleClick: () => ipcRenderer.send("bubble:click"),
+
+  // --- bubble style chooser ---
+  /** The available styles, and which one is in use. */
+  bubbleStyles: () => ipcRenderer.invoke("bubble:styles"),
+  setBubbleStyle: (id) => ipcRenderer.send("bubble:set-style", id),
+  closeBubbleStyles: () => ipcRenderer.send("bubble:close-styles"),
+
+  // --- 一言 ---
+  hitokotoState: () => ipcRenderer.invoke("hitokoto:state"),
+  /** Main clamps this and answers with hitokoto:state — the field is free text. */
+  setHitokotoMinutes: (minutes) => ipcRenderer.send("hitokoto:set-minutes", minutes),
+  previewHitokoto: () => ipcRenderer.send("hitokoto:preview"),
+  closeHitokoto: () => ipcRenderer.send("hitokoto:close"),
+  onHitokotoState: (handler) => ipcRenderer.on("hitokoto:state", (_event, state) => handler(state)),
+
   // --- tip window ---
   tipImage: () => ipcRenderer.invoke("tip:image"),
   fitTip: (height) => ipcRenderer.send("tip:fit", height),
   closeTip: () => ipcRenderer.send("tip:close"),
+  /** Open the author's page. The URL lives in main, not here. */
+  openAuthorPage: () => ipcRenderer.send("tip:open-author"),
   onFocusKey: (handler) => ipcRenderer.on("settings:focus-key", () => handler())
 });

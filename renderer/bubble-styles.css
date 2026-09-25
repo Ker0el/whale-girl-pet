@@ -1,0 +1,123 @@
+/* The bubble style chooser. Same dark surface as the picker and settings. */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ink-800);
+  color: var(--text);
+  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+header {
+  padding: 20px 26px 18px;
+  background: var(--ink-700);
+  border-bottom: 1px solid var(--ink-900);
+  flex: 0 0 auto;
+}
+
+h1 {
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--blue-200);
+}
+
+header p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+#grid {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 22px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  align-content: start;
+}
+
+.card {
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: var(--ink-700);
+  padding: 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.card:hover {
+  background: var(--ink-600);
+  border-color: var(--blue-400);
+}
+
+.card.selected {
+  background: var(--ink-600);
+  border-color: var(--blue-400);
+}
+
+/* Somewhere for the bubble to float, and somewhere for its glow to fall. No
+   overflow clipping: the shadow is the point of half these styles. */
+.stage {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 190px;
+  padding: 24px 24px 40px;
+  border-radius: var(--radius-sm);
+  background: var(--ink-900);
+}
+
+/* The card sets the scale; everything else about the bubble comes from
+   bubble.css, unchanged. Close to life size — the bubble beside a 220px pet is
+   drawn at 1.0, so anything much smaller here would be showing a shape nobody
+   is ever going to see. The bottom margin stands in for the gap the real bubble
+   leaves to the pet, since there is no pet here to leave a gap to. */
+.card .bubble {
+  --f: 1.02;
+  margin-bottom: 14px;
+  cursor: inherit;
+}
+
+.name {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.card.selected .name {
+  color: var(--blue-200);
+}
+
+.tick {
+  color: var(--blue-400);
+  white-space: nowrap;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ink-500);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--blue-700);
+}
