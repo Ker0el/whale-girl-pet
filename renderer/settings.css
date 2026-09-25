@@ -1,0 +1,148 @@
+/* Same blue palette as the picker: deep blue-tinted surface, #64b5f6 accents
+   (see theme.css). */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  /* The window is sized to the content by settings.js, so nothing here should
+     ever overflow — a scrollbar in a four-field dialog looks broken. */
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  padding: 22px 24px 18px;
+  background: var(--ink-800);
+  color: var(--text);
+  font: 13px/1.7 system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+}
+
+h1 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--blue-200);
+}
+
+.hint {
+  margin: 0 0 14px;
+  color: var(--text-muted);
+}
+
+.hint.small {
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 14px 0 0;
+  word-break: break-all;
+}
+
+.mono {
+  font-family: ui-monospace, Consolas, monospace;
+  color: var(--blue-300);
+}
+
+/* A status chip rather than another paragraph: it is the one thing on this
+   screen the user needs to read at a glance. */
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--ink-700);
+  border-left: 3px solid var(--blue-400);
+}
+
+.status::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--blue-400);
+  flex: 0 0 8px;
+}
+
+.status.warn {
+  border-left-color: #e8a33d;
+  color: #f0c88a;
+}
+
+.status.warn::before {
+  background: #e8a33d;
+}
+
+input[type="password"],
+input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--ink-500);
+  border-radius: var(--radius-sm);
+  background: var(--ink-900);
+  color: var(--text);
+  font: inherit;
+  font-family: ui-monospace, Consolas, monospace;
+  outline: none;
+}
+
+input:focus {
+  border-color: var(--blue-400);
+}
+
+input::placeholder {
+  color: var(--ink-500);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+button {
+  padding: 8px 18px;
+  border: 1px solid var(--ink-500);
+  border-radius: var(--radius-sm);
+  background: var(--ink-600);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: var(--ink-500);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+button.primary {
+  background: var(--blue-700);
+  border-color: var(--blue-600);
+}
+
+button.primary:hover {
+  background: var(--blue-600);
+  border-color: var(--blue-400);
+}
+
+.toast {
+  margin-left: auto;
+  color: var(--blue-300);
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.toast.show {
+  opacity: 1;
+}
+
+.toast.bad {
+  color: #f0c88a;
+}

@@ -1,0 +1,31 @@
+/* Shared blue palette for every window in the app.
+ *
+ * The right-click menu keeps the pet's original look: solid #64b5f6 with white
+ * text, which is what the in-page pet used. The large windows (action picker,
+ * settings) use the same hue as a dark blue-tinted surface instead of a solid
+ * fill — a 1000x740 window painted #64b5f6 would be unusable — so the whole app
+ * still reads as one palette without any screen being blinding. */
+:root {
+  --blue-50: #f0f7fe;
+  --blue-100: #e8f2fb;
+  --blue-200: #cfe6f8;
+  --blue-300: #9ecbf0;
+  --blue-400: #64b5f6; /* the pet's menu blue */
+  --blue-500: #3d9ae8;
+  --blue-600: #2a7fc4;
+  --blue-700: #2a6ea8;
+
+  /* Deep blue-tinted neutrals for large surfaces. */
+  --ink-900: #101a22;
+  --ink-800: #16232d;
+  --ink-700: #1d2f3b;
+  --ink-600: #27404f;
+  --ink-500: #33556a;
+
+  --text: #e8f2fb;
+  --text-muted: #8fb3cc;
+  --text-on-accent: #ffffff;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+}

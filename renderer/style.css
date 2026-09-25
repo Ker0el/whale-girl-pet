@@ -1,0 +1,35 @@
+/* The window is exactly the pet's size and fully transparent, so the GIF's own
+   alpha is what the user sees. Nothing here may paint a background, or the
+   "floating on the desktop" illusion breaks. */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+
+#pet {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  cursor: grab;
+}
+
+#pet.dragging {
+  cursor: grabbing;
+}
+
+/* Shown only when the asset folders are missing entirely. */
+#fallback {
+  color: var(--blue-300);
+  font: 13px/1.6 system-ui, -apple-system, "Microsoft YaHei", sans-serif;
+  text-align: center;
+  padding-top: 38%;
+}

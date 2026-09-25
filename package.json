@@ -1,0 +1,46 @@
+{
+  "name": "whale-girl-pet",
+  "productName": "鲸鱼娘桌宠",
+  "version": "1.0.0",
+  "private": true,
+  "description": "鲸鱼娘桌宠 — 一个独立的 Windows 桌面宠物",
+  "author": "星空",
+  "license": "MIT",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --remote-debugging-port=9333",
+    "pack": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^44.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "build": {
+    "appId": "com.xingkong.whalegirlpet",
+    "productName": "鲸鱼娘桌宠",
+    "copyright": "Copyright © 2026 星空",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "assets/icon.ico",
+      "assets/tray.png"
+    ],
+    "extraFiles": [
+      { "from": "assets/素材", "to": "素材" },
+      { "from": "assets/蓝色大肥鱼表情包", "to": "蓝色大肥鱼表情包" },
+      { "from": "build/使用说明.txt", "to": "使用说明.txt" }
+    ],
+    "asar": true,
+    "win": {
+      "target": [{ "target": "zip", "arch": ["x64"] }],
+      "icon": "assets/icon.ico"
+    },
+    "//compression": "The GIFs are already compressed and gain ~0.5%, but Electron's own files shrink from ~370MB to ~100MB. store would give up that 270MB for nothing.",
+    "compression": "normal"
+  }
+}

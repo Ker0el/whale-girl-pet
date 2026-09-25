@@ -1,0 +1,13 @@
+# Dependencies and build output
+node_modules/
+dist/
+
+# The asset packs are ~475 MB total and are NOT part of this repository — see
+# the "素材" section of the README. Users supply their own GIFs in these
+# folders; the app reads whatever is there.
+assets/素材/
+assets/蓝色大肥鱼表情包/
+
+# Scratch files from local testing
+_*.png
+*.log

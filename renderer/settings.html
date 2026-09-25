@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+    <title>鲸鱼娘桌宠 · 设置</title>
+    <link rel="stylesheet" href="theme.css" />
+    <link rel="stylesheet" href="settings.css" />
+  </head>
+  <body>
+    <h1>DeepSeek API Key</h1>
+    <p class="hint">
+      只用于菜单里的「查余额」。不填也能正常使用桌宠，只是这一项用不了。<br />
+      Key 可以在 <span class="mono">platform.deepseek.com</span> 创建。
+    </p>
+
+    <p id="status" class="status">读取中…</p>
+
+    <input id="key" type="password" placeholder="sk-…" autocomplete="off" spellcheck="false" />
+
+    <div class="actions">
+      <button id="save" type="button" class="primary">保存</button>
+      <button id="clear" type="button">清除</button>
+      <span id="toast" class="toast"></span>
+    </div>
+
+    <p id="storage" class="hint small"></p>
+
+    <script src="settings.js"></script>
+  </body>
+</html>
