@@ -38,7 +38,10 @@ PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 
 OutputDir={#RootDir}\dist
-OutputBaseFilename={#AppName}-安装程序-{#AppVersion}
+; 文件名用 ASCII：GitHub 的 release 附件名不接受非 ASCII（中文会被清洗成
+; "-.-1.0.0.exe" 这种），而且中文经 bash 传给 gh 时还会被转码破坏。
+; 对外显示的中文名走 AppName / 窗口标题 / 快捷方式，不受影响。
+OutputBaseFilename=whale-girl-pet-setup-{#AppVersion}
 SetupIconFile={#RootDir}\assets\icon.ico
 UninstallDisplayIcon={app}\{#AppExeName}
 UninstallDisplayName={#AppName}
