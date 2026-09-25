@@ -6,8 +6,6 @@
 
 **一个现代化简单美观的 Windows 桌面宠物。**
 
-选一个表情，它就停在那儿 —— 不会自己变。
-
 [**下载**](https://github.com/Ker0el/whale-girl-pet/releases/latest) ·
 Windows 10/11 x64 ·
 免安装、免 Node、**素材已内置**
