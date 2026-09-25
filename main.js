@@ -1,8 +1,10 @@
 // 鲸鱼娘桌宠 — main process.
 //
 // A standalone Windows desktop pet. No DSH, no server, no Node required on the
-// target machine: assets are read from folders next to the executable, and the
-// only network call the app ever makes is the optional DeepSeek balance check.
+// target machine: assets are read from folders next to the executable.
+//
+// The only network traffic is the optional DeepSeek balance check, which also
+// polls on a timer once a key is saved — see BALANCE_POLL_MS.
 "use strict";
 
 const {
@@ -35,6 +37,10 @@ const PET_SIZE_PX = 220;
 const MIN_SIZE_PX = 80;
 const MAX_SIZE_PX = 640;
 const EDGE_MARGIN = 16;
+
+// How often to sample the balance while the app runs, so "spent today" stays
+// meaningful without the user having to click. Only used when a key is saved.
+const BALANCE_POLL_MS = 10 * 60 * 1000;
 
 // Keeps the config out of a Chinese-named directory: %APPDATA% is browsed by
 // humans and by backup/cleanup tools, and ASCII survives both.
@@ -617,22 +623,66 @@ function openSettings(focusKeyField) {
   });
 }
 
-async function showBalance() {
+/** Local calendar day as YYYY-MM-DD, so "today" flips at the user's midnight. */
+function localDayKey(d = new Date()) {
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/**
+ * Fold a fresh balance reading into today's spend total.
+ *
+ * The API only ever reports the *current* balance — there is no usage or
+ * billing endpoint (every plausible path 404s), so "spent today" has to be
+ * accumulated here. Each observed decrease is added; top-ups are skipped rather
+ * than counted as negative spending. Money spent and then topped up again
+ * entirely between two readings is invisible, which is why this is a tally of
+ * what was observed rather than an official statement.
+ */
+function trackSpend(balance) {
+  const today = localDayKey();
+  const prev = config.spend && typeof config.spend === "object" ? config.spend : {};
+
+  if (prev.day !== today) {
+    // First reading of a new day: it becomes the baseline, spending resets.
+    config.spend = { day: today, total: 0, lastBalance: balance };
+    saveConfig();
+    return config.spend;
+  }
+
+  const last = Number(prev.lastBalance);
+  let total = Number(prev.total) || 0;
+  if (Number.isFinite(last) && balance < last) {
+    total = Number((total + (last - balance)).toFixed(2));
+  }
+  config.spend = { day: today, total, lastBalance: balance };
+  saveConfig();
+  return config.spend;
+}
+
+async function showBalance({ silent = false } = {}) {
   const key = getApiKey();
-  if (!key) return openSettings(true);
+  if (!key) {
+    // Only bother the user about the missing key when they asked for a balance.
+    if (!silent) openSettings(true);
+    return;
+  }
   try {
     const res = await fetch(DEEPSEEK_BALANCE_URL, { headers: { authorization: "Bearer " + key } });
     const text = await res.text();
     if (!res.ok) throw new Error(`HTTP ${res.status}${text ? "：" + text.slice(0, 200) : ""}`);
-    const body = JSON.parse(text);
-    const info = body && body.balance_infos && body.balance_infos[0];
+    const info = JSON.parse(text)?.balance_infos?.[0];
+    if (!info) throw new Error("余额接口没有返回数据");
+
+    const balance = Number(info.total_balance);
+    const spend = trackSpend(balance);
+    if (silent) return;
     notify(
       "鲸鱼娘桌宠 · 余额",
-      info
-        ? `余额 ${info.total_balance} ${info.currency}（充值 ${info.topped_up_balance} / 赠送 ${info.granted_balance}）`
-        : JSON.stringify(body)
+      `余额 ${balance.toFixed(2)} ${info.currency} · 今日消费 ${spend.total.toFixed(2)}`
     );
   } catch (err) {
+    if (silent) return;
     notify("鲸鱼娘桌宠 · 余额查询失败", err && err.message ? err.message : String(err));
   }
 }
@@ -976,6 +1026,17 @@ if (!app.requestSingleInstanceLock()) {
         }
       }, 1500);
     }
+
+    // Today's spend only means anything if the balance is sampled through the
+    // day, and a desktop pet already runs all day. Ten minutes catches each
+    // drop and is rare enough to stay out of the way. This is also the only
+    // network traffic the app generates on its own, and it stays silent until
+    // the user has saved an API key.
+    const pollBalance = () => {
+      if (hasApiKey()) showBalance({ silent: true });
+    };
+    setTimeout(pollBalance, 20000);
+    setInterval(pollBalance, BALANCE_POLL_MS);
   });
 
   app.on("window-all-closed", () => {
