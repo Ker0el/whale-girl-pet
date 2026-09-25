@@ -10,7 +10,8 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron . --remote-debugging-port=9333",
-    "pack": "electron-builder --win"
+    "pack": "electron-builder --win",
+    "build:dir": "electron-builder --win --dir"
   },
   "devDependencies": {
     "electron": "^44.0.0",
@@ -33,16 +34,31 @@
       "assets/zanshang.png"
     ],
     "extraFiles": [
-      { "from": "assets/素材", "to": "素材" },
-      { "from": "assets/蓝色大肥鱼表情包", "to": "蓝色大肥鱼表情包" },
-      { "from": "build/使用说明.txt", "to": "使用说明.txt" }
+      {
+        "from": "assets/素材",
+        "to": "素材"
+      },
+      {
+        "from": "assets/蓝色大肥鱼表情包",
+        "to": "蓝色大肥鱼表情包"
+      },
+      {
+        "from": "build/使用说明.txt",
+        "to": "使用说明.txt"
+      }
     ],
     "asar": true,
     "win": {
-      "target": [{ "target": "zip", "arch": ["x64"] }],
+      "target": [
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
       "icon": "assets/icon.ico"
     },
-    "//compression": "The GIFs are already compressed and gain ~0.5%, but Electron's own files shrink from ~370MB to ~100MB. store would give up that 270MB for nothing.",
     "compression": "normal"
   }
 }

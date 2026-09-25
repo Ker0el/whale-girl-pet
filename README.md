@@ -60,6 +60,21 @@
 
 想换开机默认显示的那张，改 `main.js` 里的 `DEFAULT_REACTION`。
 
+## 安装
+
+两种方式，装出来的东西一样：
+
+**安装程序**（推荐）—— 双击 `鲸鱼娘桌宠-安装程序-1.0.0.exe`，按向导走完即可。
+
+安装位置默认是**安装程序所在文件夹下的同名子文件夹**：如果 setup 放在 `D:\下载\`，
+就装到 `D:\下载\鲸鱼娘桌宠\`。向导里可以改。卸载走「应用和功能」或安装目录里的
+`unins000.exe`。
+
+**免安装 zip** —— 解压到任意位置，双击 `鲸鱼娘桌宠.exe`。
+
+> 装完之后**别移动安装目录**：开机自启指向的是绝对路径，移动后需要重新开关一次
+> 菜单里的「开机自启」。
+
 ## 从源码构建
 
 ```bash
@@ -67,10 +82,24 @@ git clone https://github.com/Ker0el/whale-girl-pet.git
 cd whale-girl-pet
 npm install
 npm start          # 开发模式
-npm run pack       # 打包成 dist/鲸鱼娘桌宠-1.0.0-win.zip
+npm run pack       # 免安装 zip: dist/鲸鱼娘桌宠-1.0.0-win.zip
 ```
 
 需要 Node.js 22+。
+
+### 构建安装程序
+
+需要另外装 [Inno Setup 6](https://jrsoftware.org/isdl.php)，然后：
+
+```bat
+build\make-installer.cmd
+```
+
+脚本会先产出 `dist\win-unpacked\`，再用 Inno Setup 编成单文件安装程序。产物体积约
+585 MB —— 其中 473 MB 是素材，其余是压缩后的 Electron 运行时。
+
+素材在 `build\installer.iss` 里标了 `nocompression`：GIF 已经压过了，再走一遍 LZMA
+只能省 0.5%，却会把打包时间从一分钟拖到十几分钟。
 
 > **注意**：仓库里**不含素材**（见下节）。直接 `npm start` 会显示「找不到素材」，先把 GIF 放进 `assets/蓝色大肥鱼表情包/` 即可。
 
