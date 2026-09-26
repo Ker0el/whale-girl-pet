@@ -52,6 +52,13 @@ const MIN_SIZE_PX = 80;
 const MAX_SIZE_PX = 640;
 const EDGE_MARGIN = 16;
 
+// How often the pet's always-on-top level is re-applied. Windows can drop a
+// topmost window out of the topmost band without clearing WS_EX_TOPMOST, and
+// leaves nothing to poll for, so the demotion has to be undone blind — see
+// holdPetOnTop. Short enough that losing the race reads as a flicker rather
+// than as the pet having gone missing.
+const TOPMOST_REASSERT_MS = 3000;
+
 // How often to sample the balance while the app runs, so "spent today" stays
 // meaningful without the user having to click. Only used when a key is saved.
 const BALANCE_POLL_MS = 10 * 60 * 1000;
@@ -496,6 +503,35 @@ function bindAbovePet(auxWin) {
   };
   auxWin.on("show", raise);
   auxWin.on("focus", raise);
+}
+
+/**
+ * Re-apply the pet's always-on-top level, on a timer.
+ *
+ * Windows does not actually guarantee that a topmost window stays on top. A
+ * window that gets maximised or brought to the foreground can push ours back
+ * down into the ordinary z-order band, and from inside the app the demotion is
+ * invisible: WS_EX_TOPMOST is left set, so isAlwaysOnTop() goes on answering
+ * true and there is nothing to watch for. Electron has documented the same
+ * thing since 2015 (electron/electron#2097) and the workaround everyone lands
+ * on is to re-apply the level rather than set it once.
+ *
+ * The re-apply genuinely reaches the window: setAlwaysOnTop ends at
+ * SetWindowPos(hwnd, HWND_TOPMOST, ...) with no early-out on the way down
+ * (NativeWindowViews -> Widget -> DesktopWindowTreeHostWin ->
+ * HWNDMessageHandler::SetAlwaysOnTop), so a repeat call is a real re-assert
+ * and not a no-op.
+ *
+ * That call puts the pet at the top of the topmost band, which is also where
+ * our own windows sit, so whatever is on screen gets raised again afterwards.
+ * bindAbovePet does that on show/focus, which is too early to help here.
+ */
+function holdPetOnTop() {
+  if (!win || win.isDestroyed() || hidden) return;
+  win.setAlwaysOnTop(true, "screen-saver");
+  for (const auxWin of [menuWin, picker, bubbleWin, stylesWin, hitokotoWin, settingsWin, tipWin]) {
+    if (auxWin && !auxWin.isDestroyed() && auxWin.isVisible()) auxWin.moveTop();
+  }
 }
 
 function createMenuWindow() {
@@ -1657,6 +1693,9 @@ if (!app.requestSingleInstanceLock()) {
     await refreshCatalog();
     createPetWindow();
     applyClickThrough();
+    // Created topmost, but Windows can drop it back out of the topmost band
+    // behind our back — see holdPetOnTop.
+    setInterval(holdPetOnTop, TOPMOST_REASSERT_MS);
 
     tray = new Tray(trayIconImage());
     tray.setToolTip("鲸鱼娘桌宠");

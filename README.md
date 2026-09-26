@@ -107,7 +107,7 @@ git clone https://github.com/Ker0el/whale-girl-pet.git
 cd whale-girl-pet
 npm install
 npm start          # 开发模式
-npm run pack       # 免安装 zip: dist/鲸鱼娘桌宠-1.2.0-win.zip
+npm run pack       # 免安装 zip: dist/鲸鱼娘桌宠-1.2.1-win.zip
 ```
 
 需要 Node.js 22+。
